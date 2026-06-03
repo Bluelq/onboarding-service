@@ -1,0 +1,27 @@
+# Render.com blueprint — deploy this onboarding service (its own repo).
+# In Render: New + → Blueprint → pick this repo. It reads this file.
+#
+# IMPORTANT: signatures are legal records stored in SQLite on the disk below.
+# A persistent disk requires a PAID instance (Starter, ~$7/mo). On the free
+# tier there is NO disk, so onboarding.db is wiped on every redeploy/restart —
+# do NOT collect real signatures on free. Starter keeps them safe.
+services:
+  - type: web
+    name: onboarding-service
+    runtime: python
+    plan: starter            # needed for the persistent disk; free has no disk
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT
+    envVars:
+      - key: ADMIN_USER
+        value: admin
+      - key: ADMIN_PASSWORD
+        sync: false          # set in the dashboard (do not commit)
+      - key: ONBOARDING_API_KEY
+        sync: false          # shared secret your CRM uses (Meeting tab)
+      - key: ONBOARDING_DB
+        value: /var/data/onboarding.db
+    disk:
+      name: onboarding-data
+      mountPath: /var/data    # persists onboarding.db (signatures) across deploys
+      sizeGB: 1

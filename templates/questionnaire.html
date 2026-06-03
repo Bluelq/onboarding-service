@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Tell us about your site · {{ cfg.business.trading_name }}{% endblock %}
+{% block content %}
+<div class="card">
+  <h1>Let's design your site</h1>
+  <p class="lede">{{ cfg.questionnaire.intro }}</p>
+
+  <form method="post" action="{{ url_for('onboard_submit', token=session.token) }}" class="form">
+    {% for sec in cfg.questionnaire.sections %}
+      <fieldset>
+        <legend>{{ sec.title }}</legend>
+        {% for q in sec.questions %}
+          <div class="field">
+            <label for="{{ q.id }}">{{ q.label }}{% if q.required %} <span class="req">*</span>{% endif %}</label>
+            {% set val = answers.get(q.id, '') %}
+            {% if q.type == 'textarea' %}
+              <textarea id="{{ q.id }}" name="{{ q.id }}" rows="3" {% if q.required %}required{% endif %}>{{ val }}</textarea>
+            {% elif q.type == 'select' %}
+              <select id="{{ q.id }}" name="{{ q.id }}" {% if q.required %}required{% endif %}>
+                <option value="">— choose —</option>
+                {% for opt in q.options %}
+                  <option value="{{ opt }}" {% if val == opt %}selected{% endif %}>{{ opt }}</option>
+                {% endfor %}
+              </select>
+            {% elif q.type == 'checkboxes' %}
+              <div class="checks">
+                {% for opt in q.options %}
+                  <label class="check">
+                    <input type="checkbox" name="{{ q.id }}" value="{{ opt }}"
+                      {% if val and opt in val %}checked{% endif %}> {{ opt }}
+                  </label>
+                {% endfor %}
+              </div>
+            {% else %}
+              <input type="text" id="{{ q.id }}" name="{{ q.id }}" value="{{ val }}" {% if q.required %}required{% endif %}>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </fieldset>
+    {% endfor %}
+
+    <button type="submit" class="btn btn-primary">Save & continue to agreement →</button>
+  </form>
+</div>
+{% endblock %}

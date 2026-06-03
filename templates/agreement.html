@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}{{ cfg.agreement.title }} · {{ cfg.business.trading_name }}{% endblock %}
+{% block content %}
+<div class="card">
+  <h1>{{ cfg.agreement.title }}</h1>
+
+  {% if package %}
+    <div class="package-banner">
+      <strong>{{ package.name }}</strong> — {{ package.price_label }}
+      {% if deposit %}· deposit to begin: <strong>{{ deposit }}</strong>{% endif %}
+    </div>
+  {% endif %}
+
+  {% if errors %}
+    <div class="errors">
+      <ul>{% for e in errors %}<li>{{ e }}</li>{% endfor %}</ul>
+    </div>
+  {% endif %}
+
+  <div class="agreement-scroll">
+    {{ agreement_html|safe }}
+  </div>
+  <p class="muted small">{{ cfg.agreement.footer_note }}</p>
+
+  <form method="post" action="{{ url_for('agreement_sign', token=session.token) }}" class="form sign-form" id="signForm">
+    <input type="hidden" name="agreement_sha256" value="{{ agreement_sha256 }}">
+    <input type="hidden" name="signature_png" id="signature_png">
+
+    <div class="field">
+      <label for="full_name">Full legal name <span class="req">*</span></label>
+      <input type="text" id="full_name" name="full_name" value="{{ (form.full_name if form else '') or session.client_name or '' }}" required>
+    </div>
+
+    <div class="field">
+      <label>Draw your signature <span class="req">*</span></label>
+      <div class="sigpad-wrap">
+        <canvas id="sigpad" class="sigpad" width="600" height="180"></canvas>
+        <button type="button" class="btn btn-ghost btn-sm" id="clearSig">Clear</button>
+      </div>
+    </div>
+
+    <label class="check intent">
+      <input type="checkbox" name="intent" id="intent">
+      <span>{{ cfg.agreement.signature_statement }}</span>
+    </label>
+
+    <button type="submit" class="btn btn-primary" id="signBtn">Sign agreement</button>
+    <p class="muted small">
+      Your name, signature, the time you signed, your IP address and a fingerprint
+      of this exact document are recorded as your electronic signature.
+    </p>
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='signature.js') }}"></script>
+{% endblock %}

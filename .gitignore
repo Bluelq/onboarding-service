@@ -1,0 +1,10 @@
+# Signatures DB — never commit (legal records live on the server's disk).
+onboarding.db
+onboarding.db-*
+
+# config.json IS committed so the deploy has your packages/Stripe link/agreement.
+# It contains no secrets — ADMIN_PASSWORD and ONBOARDING_API_KEY are env vars.
+
+__pycache__/
+*.pyc
+.env

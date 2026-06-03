@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ cfg.business.trading_name }}{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>:root { --accent: {{ cfg.branding.accent or '#2563eb' }}; }</style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      {% if cfg.branding.logo_url %}
+        <img src="{{ cfg.branding.logo_url }}" alt="{{ cfg.business.trading_name }}" class="logo">
+      {% else %}
+        <span class="brand">{{ cfg.business.trading_name }}</span>
+      {% endif %}
+    </div>
+  </header>
+
+  <main class="wrap">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <span>{{ cfg.business.legal_name }}</span>
+      {% if cfg.business.contact_email %} · <a href="mailto:{{ cfg.business.contact_email }}">{{ cfg.business.contact_email }}</a>{% endif %}
+    </div>
+  </footer>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

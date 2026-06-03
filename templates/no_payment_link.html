@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Payment · {{ cfg.business.trading_name }}{% endblock %}
+{% block content %}
+<div class="card center">
+  <h1>Almost there</h1>
+  <p class="lede">Your agreement is signed. We'll email your deposit payment link shortly.</p>
+  <p class="muted small">
+    (No Stripe Payment Link is configured for the "{{ package.name if package else 'selected' }}"
+    package yet — add one in config.json.)
+  </p>
+</div>
+{% endblock %}

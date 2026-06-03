@@ -1,0 +1,113 @@
+{
+  "business": {
+    "trading_name": "Aentic",
+    "legal_name": "Your Full Legal Name (sole trader) trading as Aentic",
+    "contact_email": "hello@aentic.co.uk",
+    "contact_phone": "",
+    "address": "Your business address, United Kingdom",
+    "vat_registered": false,
+    "vat_number": "",
+    "website": "https://aentic.co.uk"
+  },
+
+  "branding": {
+    "accent": "#2563eb",
+    "logo_url": ""
+  },
+
+  "questionnaire": {
+    "intro": "A few questions so we build exactly the site you want. We can fill this in together on the call.",
+    "sections": [
+      {
+        "title": "The basics",
+        "questions": [
+          { "id": "business_name", "label": "Business / brand name", "type": "text", "required": true },
+          { "id": "tagline", "label": "One-line description of what you do", "type": "text" },
+          { "id": "existing_site", "label": "Existing website (if any)", "type": "text" },
+          { "id": "goal", "label": "What should the site achieve?", "type": "select",
+            "options": ["Get enquiries / leads", "Take bookings", "Sell products", "Look credible / brochure", "Other"] }
+        ]
+      },
+      {
+        "title": "Look & feel",
+        "questions": [
+          { "id": "style", "label": "Overall style", "type": "select",
+            "options": ["Modern & minimal", "Professional & corporate", "Warm & approachable", "Bold & creative"] },
+          { "id": "colours", "label": "Preferred colours (if any)", "type": "text" },
+          { "id": "likes", "label": "Sites you like (paste links)", "type": "textarea" }
+        ]
+      },
+      {
+        "title": "Content & pages",
+        "questions": [
+          { "id": "pages", "label": "Pages needed", "type": "checkboxes",
+            "options": ["Home", "About", "Services", "Pricing", "Portfolio / Gallery", "Testimonials", "Contact", "Blog", "Booking"] },
+          { "id": "services", "label": "Main services / products to feature", "type": "textarea" },
+          { "id": "have_content", "label": "Do you have text & images ready?", "type": "select",
+            "options": ["Yes, all of it", "Some of it", "No, need help"] }
+        ]
+      },
+      {
+        "title": "Practical",
+        "questions": [
+          { "id": "domain", "label": "Domain name (have one / need one?)", "type": "text" },
+          { "id": "deadline", "label": "Ideal go-live date", "type": "text" },
+          { "id": "budget", "label": "Budget range", "type": "text" },
+          { "id": "notes", "label": "Anything else we should know?", "type": "textarea" }
+        ]
+      }
+    ]
+  },
+
+  "packages": [
+    {
+      "key": "starter",
+      "name": "Starter — One-page site",
+      "price_label": "£600",
+      "deposit_pence": 30000,
+      "deposit_label": "£300 deposit (50%)",
+      "stripe_payment_link": "",
+      "summary": "A polished single-page website, mobile-ready, contact form, basic SEO."
+    },
+    {
+      "key": "business",
+      "name": "Business — Multi-page site",
+      "price_label": "£1,200",
+      "deposit_pence": 60000,
+      "deposit_label": "£600 deposit (50%)",
+      "stripe_payment_link": "",
+      "summary": "Up to 5 pages, copy assistance, contact + booking, on-page SEO."
+    },
+    {
+      "key": "custom",
+      "name": "Custom project",
+      "price_label": "Quoted",
+      "deposit_pence": 50000,
+      "deposit_label": "£500 deposit to begin",
+      "stripe_payment_link": "",
+      "summary": "Scoped to your brief from today's call."
+    }
+  ],
+
+  "agreement": {
+    "version": "v1-2026-06",
+    "title": "Website Design Services Agreement",
+    "intro": "This agreement is between {{business_legal_name}} (\"the Provider\") and {{client_name}}{{client_company_clause}} (\"the Client\"). By signing below you agree to the following terms.",
+    "clauses": [
+      { "heading": "1. Services", "body": "The Provider will design and build a website for the Client based on the discovery brief agreed on {{date}} and the selected package: {{package_name}}. Reasonable revisions are included; substantial changes to the agreed scope may be quoted separately." },
+      { "heading": "2. Fees & deposit", "body": "The total fee is {{package_price}}. A deposit of {{deposit_amount}} is payable to begin work and is non-refundable once design work has started. The balance is due on completion, before the site is handed over or made live." },
+      { "heading": "3. Client responsibilities", "body": "The Client will provide content (text, images, logos) and timely feedback. Delays in providing materials may move the delivery date. The Client confirms they own or are licensed to use all materials supplied." },
+      { "heading": "4. Timescales", "body": "An indicative go-live date will be agreed. Timescales depend on the Client providing content and feedback promptly." },
+      { "heading": "5. Intellectual property", "body": "On full payment, ownership of the final website design and content created for the Client transfers to the Client. The Provider may display the work in its portfolio unless the Client requests otherwise in writing." },
+      { "heading": "6. Third-party costs", "body": "Domain names, hosting, premium plugins, stock imagery and similar third-party costs are not included unless stated and are passed on at cost or arranged by the Client." },
+      { "heading": "7. Cancellation", "body": "Either party may cancel in writing. Fees for work completed up to cancellation remain payable; the deposit is non-refundable once work has begun." },
+      { "heading": "8. Liability", "body": "The Provider's total liability under this agreement is limited to the fees paid by the Client. The Provider is not liable for indirect or consequential losses." },
+      { "heading": "9. Data protection", "body": "Both parties will comply with UK GDPR and the Data Protection Act 2018. Personal data shared for the project is used only to deliver the services." },
+      { "heading": "10. Governing law", "body": "This agreement is governed by the laws of England and Wales and the courts of England and Wales have exclusive jurisdiction." }
+    ],
+    "signature_statement": "I confirm I have read and agree to this agreement. I intend this to be my electronic signature and I agree to be legally bound by it.",
+    "footer_note": "This is a starting template, not legal advice — have a solicitor review it before relying on it commercially."
+  },
+
+  "session_expiry_days": 30
+}

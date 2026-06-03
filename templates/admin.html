@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Admin · {{ cfg.business.trading_name }}{% endblock %}
+{% block content %}
+<div class="card">
+  <h1>New client onboarding</h1>
+  {% if warn_default_pw %}
+    <div class="errors"><strong>Security:</strong> the admin password is still the default. Set <code>ADMIN_PASSWORD</code> before deploying.</div>
+  {% endif %}
+
+  <form method="post" action="{{ url_for('admin_create_session') }}" class="form">
+    <div class="grid2">
+      <div class="field">
+        <label for="client_name">Client name</label>
+        <input type="text" id="client_name" name="client_name" placeholder="Jane Smith">
+      </div>
+      <div class="field">
+        <label for="client_email">Client email</label>
+        <input type="email" id="client_email" name="client_email" placeholder="jane@example.com">
+      </div>
+      <div class="field">
+        <label for="company">Company (optional)</label>
+        <input type="text" id="company" name="company">
+      </div>
+      <div class="field">
+        <label for="package_key">Package</label>
+        <select id="package_key" name="package_key">
+          {% for p in cfg.packages %}
+            <option value="{{ p.key }}">{{ p.name }} — {{ p.price_label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="field">
+        <label for="deposit_pounds">Deposit override £ (optional)</label>
+        <input type="text" id="deposit_pounds" name="deposit_pounds" placeholder="e.g. 300">
+      </div>
+      <div class="field">
+        <label for="crm_lead_id">CRM lead id (optional)</label>
+        <input type="text" id="crm_lead_id" name="crm_lead_id">
+      </div>
+    </div>
+    <div class="field">
+      <label for="notes">Internal notes (optional)</label>
+      <textarea id="notes" name="notes" rows="2"></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Create link</button>
+  </form>
+</div>
+
+<div class="card">
+  <h2>Sessions</h2>
+  {% if not sessions %}
+    <p class="muted">No sessions yet.</p>
+  {% else %}
+  <table class="list">
+    <thead><tr><th>Client</th><th>Package</th><th>Status</th><th>Created</th><th></th></tr></thead>
+    <tbody>
+      {% for s in sessions %}
+      <tr>
+        <td>{{ s.client_name or '—' }}<br><span class="muted small">{{ s.client_email or '' }}</span></td>
+        <td>{{ s.package_key or '—' }}</td>
+        <td><span class="badge badge-{{ s.status }}">{{ s.status }}</span></td>
+        <td class="small muted">{{ s.created_at[:16] }}</td>
+        <td><a href="{{ url_for('admin_session_detail', token=s.token) }}">open</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+</div>
+{% endblock %}

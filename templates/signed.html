@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Agreement signed · {{ cfg.business.trading_name }}{% endblock %}
+{% block content %}
+<div class="card center">
+  <div class="tick">✓</div>
+  <h1>Agreement signed</h1>
+  <p class="lede">Thanks {{ sig.signer_full_name }} — your agreement is signed and on record.</p>
+
+  <div class="receipt">
+    <div><span>Signed by</span><strong>{{ sig.signer_full_name }}</strong></div>
+    <div><span>Date &amp; time (UTC)</span><strong>{{ sig.signed_at_utc }}</strong></div>
+    {% if package %}<div><span>Package</span><strong>{{ package.name }}</strong></div>{% endif %}
+    {% if deposit %}<div><span>Deposit to begin</span><strong>{{ deposit }}</strong></div>{% endif %}
+  </div>
+
+  {% if can_pay %}
+    <a class="btn btn-primary btn-lg" href="{{ url_for('pay', token=session.token) }}">
+      Pay deposit {{ deposit }} →
+    </a>
+    <p class="muted small">You'll be taken to our secure Stripe payment page.</p>
+  {% else %}
+    <p class="muted">We'll send your deposit payment link shortly.</p>
+  {% endif %}
+
+  <p class="small"><a href="{{ url_for('agreement_certificate', token=session.token) }}" target="_blank">View signing certificate</a></p>
+</div>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}{{ session.client_name or 'Session' }} · Admin{% endblock %}
+{% block content %}
+<div class="card">
+  <p><a href="{{ url_for('admin') }}">← all sessions</a></p>
+  <h1>{{ session.client_name or 'Client' }}</h1>
+  <p class="muted">{{ session.client_email }} {% if session.company %}· {{ session.company }}{% endif %}
+     · <span class="badge badge-{{ session.status }}">{{ session.status }}</span></p>
+
+  <h2>Send these to the client</h2>
+  <div class="linkbox">
+    <label>Questionnaire</label>
+    <input readonly value="{{ base }}{{ url_for('onboard', token=session.token) }}" onclick="this.select()">
+  </div>
+  <div class="linkbox">
+    <label>Agreement &amp; payment</label>
+    <input readonly value="{{ base }}{{ url_for('agreement', token=session.token) }}" onclick="this.select()">
+  </div>
+</div>
+
+<div class="card">
+  <h2>Discovery brief</h2>
+  {% if brief %}
+    <pre class="brief">{{ brief }}</pre>
+    <a class="btn btn-ghost btn-sm" href="{{ url_for('onboard_brief', token=session.token) }}" target="_blank">Download brief.txt</a>
+  {% else %}
+    <p class="muted">No questionnaire submitted yet.</p>
+  {% endif %}
+</div>
+
+<div class="card">
+  <h2>Signature</h2>
+  {% if sig %}
+    <div class="receipt">
+      <div><span>Signed by</span><strong>{{ sig.signer_full_name }}</strong></div>
+      <div><span>When (UTC)</span><strong>{{ sig.signed_at_utc }}</strong></div>
+      <div><span>IP</span><strong>{{ sig.signer_ip }}</strong></div>
+      <div><span>Doc SHA-256</span><strong class="small">{{ sig.agreement_sha256[:24] }}…</strong></div>
+    </div>
+    {% if sig.signature_png %}<img class="sig-img" src="{{ sig.signature_png }}" alt="signature">{% endif %}
+    <p><a class="btn btn-ghost btn-sm" href="{{ url_for('agreement_certificate', token=session.token) }}" target="_blank">View / print certificate</a></p>
+  {% else %}
+    <p class="muted">Not signed yet.</p>
+  {% endif %}
+</div>
+{% endblock %}
