@@ -16,6 +16,10 @@
     <label>Agreement &amp; payment</label>
     <input readonly value="{{ base }}{{ url_for('agreement', token=session.token) }}" onclick="this.select()">
   </div>
+  <div class="linkbox">
+    <label>Upload assets (logo, photos, content)</label>
+    <input readonly value="{{ base }}{{ url_for('upload_page', token=session.token) }}" onclick="this.select()">
+  </div>
 </div>
 
 <div class="card">
@@ -41,6 +45,24 @@
     <p><a class="btn btn-ghost btn-sm" href="{{ url_for('agreement_certificate', token=session.token) }}" target="_blank">View / print certificate</a></p>
   {% else %}
     <p class="muted">Not signed yet.</p>
+  {% endif %}
+</div>
+
+<div class="card">
+  <h2>Uploaded assets {% if uploads %}({{ uploads|length }}){% endif %}</h2>
+  {% if uploads %}
+    <p><a class="btn btn-primary btn-sm" href="{{ url_for('admin_uploads_zip', token=session.token) }}">⬇ Download all (.zip)</a></p>
+    <ul class="filelist">
+      {% for f in uploads %}
+        <li>
+          <span class="fname">{{ f.original_name }}</span>
+          <span class="muted small">{{ f._size }}</span>
+          <a class="btn btn-ghost btn-sm" href="{{ url_for('admin_download_upload', upload_id=f.id) }}">Download</a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="muted">No files uploaded yet.</p>
   {% endif %}
 </div>
 {% endblock %}

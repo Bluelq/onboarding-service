@@ -40,6 +40,12 @@
     <p class="muted">We'll send your payment link shortly.</p>
   {% endif %}
 
+  <div style="margin-top:26px; padding-top:20px; border-top:1px solid var(--line);">
+    <h2>One more thing</h2>
+    <p class="muted">Send us your logo, photos and any content you'd like on the site.</p>
+    <a class="btn btn-ghost btn-lg" href="{{ url_for('upload_page', token=session.token) }}">Upload your assets →</a>
+  </div>
+
   <p class="small" style="margin-top:18px;">
     <a href="{{ url_for('agreement_certificate', token=session.token) }}" target="_blank">View signing certificate</a>
   </p>

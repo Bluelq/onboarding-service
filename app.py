@@ -25,6 +25,7 @@ import json
 import base64
 import hashlib
 import secrets
+import zipfile
 from datetime import datetime, timedelta, timezone
 from functools import wraps
 
@@ -32,6 +33,7 @@ from flask import (
     Flask, request, render_template, redirect, url_for, abort,
     Response, jsonify, send_file,
 )
+from werkzeug.utils import secure_filename
 
 import db
 from config import load_config, get_package
@@ -52,6 +54,24 @@ ONBOARDING_API_KEY = os.environ.get("ONBOARDING_API_KEY", "")
 # Vercel marketing site rewriting /agreement/* to this backend), set this so
 # generated client links use the public domain instead of the backend host.
 PUBLIC_BASE_URL = os.environ.get("PUBLIC_BASE_URL", "").rstrip("/")
+
+# Client asset uploads (logos, images, content). Stored on the persistent disk
+# next to the DB so they survive redeploys on Render (/var/data/uploads).
+UPLOAD_DIR = os.environ.get("ONBOARDING_UPLOAD_DIR") or os.path.join(
+    os.path.dirname(os.path.abspath(db.DB_PATH)), "uploads")
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+MAX_UPLOAD_MB = int(os.environ.get("MAX_UPLOAD_MB", "100"))
+app.config["MAX_CONTENT_LENGTH"] = MAX_UPLOAD_MB * 1024 * 1024
+ALLOWED_UPLOAD_EXT = {
+    # images
+    "png", "jpg", "jpeg", "gif", "webp", "svg", "bmp", "tiff", "heic", "ico",
+    # docs / content
+    "pdf", "doc", "docx", "txt", "rtf", "odt", "csv", "xls", "xlsx", "ppt", "pptx",
+    # design / source
+    "ai", "psd", "eps", "sketch", "fig", "indd",
+    # archives (clients often zip a folder of assets)
+    "zip", "rar", "7z",
+}
 
 
 # --------------------------------------------------------------------------
@@ -309,10 +329,14 @@ def admin_session_detail(token):
     q = db.latest_questionnaire(token)
     answers = json.loads(q["answers_json"]) if q else None
     sig = db.get_signature_for_token(token)
+    uploads = db.list_uploads(token)
+    for f in uploads:
+        f["_size"] = _human_size(f.get("size_bytes"))
     base = public_base()
     return render_template(
         "admin_detail.html", cfg=cfg, session=session, answers=answers,
-        brief=(q["brief"] if q else None), sig=sig, base=base, pounds=pounds,
+        brief=(q["brief"] if q else None), sig=sig, uploads=uploads,
+        base=base, pounds=pounds,
     )
 
 
@@ -633,6 +657,129 @@ def pay(token):
         url += f"&prefilled_email={session['client_email']}"
     db.set_status(token, "paid")  # optimistic; confirm via Stripe dashboard/webhook
     return redirect(url)
+
+
+# --------------------------------------------------------------------------
+# client: asset uploads (logos, images, content)
+# --------------------------------------------------------------------------
+
+def _ext_ok(filename):
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_UPLOAD_EXT
+
+
+def _human_size(n):
+    n = float(n or 0)
+    for unit in ("B", "KB", "MB", "GB"):
+        if n < 1024 or unit == "GB":
+            return f"{n:.0f} {unit}" if unit == "B" else f"{n:.1f} {unit}"
+        n /= 1024
+
+
+@app.errorhandler(413)
+def too_large(_e):
+    return ("That upload is larger than the %d MB limit. Please upload fewer or "
+            "smaller files at a time (or zip them)." % MAX_UPLOAD_MB), 413
+
+
+@app.route("/upload/<token>", methods=["GET"])
+def upload_page(token):
+    cfg = load_config()
+    session = db.get_session(token)
+    if not session:
+        abort(404)
+    files = db.list_uploads(token)
+    for f in files:
+        f["_size"] = _human_size(f.get("size_bytes"))
+    try:
+        saved = int(request.args.get("saved", 0))
+    except ValueError:
+        saved = 0
+    rejected = [r for r in (request.args.get("rejected", "").split(",")) if r]
+    return render_template(
+        "upload.html", cfg=cfg, session=session, files=files,
+        max_mb=MAX_UPLOAD_MB, saved=saved, rejected=rejected,
+        allowed_hint="images, PDFs, Office docs, design files, and zips",
+    )
+
+
+@app.route("/upload/<token>", methods=["POST"])
+def upload_submit(token):
+    session = db.get_session(token)
+    if not session:
+        abort(404)
+    incoming = request.files.getlist("files")
+    saved, rejected = 0, []
+    dest_dir = os.path.join(UPLOAD_DIR, token)
+    os.makedirs(dest_dir, exist_ok=True)
+    for fs in incoming:
+        if not fs or not fs.filename:
+            continue
+        if not _ext_ok(fs.filename):
+            rejected.append(fs.filename)
+            continue
+        safe = secure_filename(fs.filename) or "file"
+        stored = f"{secrets.token_hex(8)}_{safe}"
+        fs.save(os.path.join(dest_dir, stored))
+        size = os.path.getsize(os.path.join(dest_dir, stored))
+        db.add_upload(token, fs.filename, f"{token}/{stored}", fs.mimetype, size, now_utc_iso())
+        saved += 1
+    from urllib.parse import urlencode
+    qs = urlencode({"saved": saved, "rejected": ",".join(rejected)})
+    return redirect(url_for("upload_page", token=token) + ("?" + qs if (saved or rejected) else ""))
+
+
+@app.route("/upload/<token>/delete/<int:upload_id>", methods=["POST"])
+def upload_delete(token, upload_id):
+    up = db.get_upload(upload_id)
+    if not up or up.get("token") != token:
+        abort(404)
+    try:
+        os.remove(os.path.join(UPLOAD_DIR, up["stored_name"]))
+    except OSError:
+        pass
+    db.delete_upload(upload_id)
+    return redirect(url_for("upload_page", token=token))
+
+
+@app.route("/admin/uploads/<int:upload_id>")
+@require_admin
+def admin_download_upload(upload_id):
+    up = db.get_upload(upload_id)
+    if not up:
+        abort(404)
+    path = os.path.join(UPLOAD_DIR, up["stored_name"])
+    if not os.path.exists(path):
+        abort(404)
+    return send_file(path, as_attachment=True,
+                     download_name=up.get("original_name") or "file")
+
+
+@app.route("/admin/sessions/<token>/uploads.zip")
+@require_admin
+def admin_uploads_zip(token):
+    files = db.list_uploads(token)
+    if not files:
+        abort(404)
+    session = db.get_session(token)
+    label = ((session or {}).get("client_name") or token).replace(" ", "_") or token
+    mem = io.BytesIO()
+    with zipfile.ZipFile(mem, "w", zipfile.ZIP_DEFLATED) as zf:
+        seen = {}
+        for f in files:
+            path = os.path.join(UPLOAD_DIR, f["stored_name"])
+            if not os.path.exists(path):
+                continue
+            name = f.get("original_name") or os.path.basename(f["stored_name"])
+            if name in seen:
+                seen[name] += 1
+                base, dot, ext = name.rpartition(".")
+                name = f"{base}_{seen[name]}{dot}{ext}" if dot else f"{name}_{seen[name]}"
+            else:
+                seen[name] = 0
+            zf.write(path, arcname=name)
+    mem.seek(0)
+    return send_file(mem, mimetype="application/zip", as_attachment=True,
+                     download_name=f"assets_{label}.zip")
 
 
 if __name__ == "__main__":

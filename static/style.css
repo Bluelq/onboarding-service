@@ -94,3 +94,16 @@ input:focus, textarea:focus, select:focus { outline: 2px solid var(--accent); ou
 .offer-features { margin: 8px 0 14px; padding-left: 18px; }
 .offer-features li { font-size: 13px; color: var(--muted); margin-bottom: 4px; }
 .offer-card .btn { margin-top: auto; text-align: center; }
+
+.ok-banner { background: #dcfce7; border: 1px solid #bbf7d0; color: #166534; padding: 12px 16px; border-radius: 10px; margin-bottom: 16px; }
+.dropzone { display: block; border: 2px dashed #c3c9d2; border-radius: 14px; padding: 36px 20px; text-align: center; cursor: pointer; background: #fcfcfd; transition: border-color .15s, background .15s; }
+.dropzone:hover, .dropzone.drag { border-color: var(--accent); background: #f0f5ff; }
+.dz-inner { display: flex; flex-direction: column; gap: 4px; }
+.dz-inner strong { font-size: 16px; }
+.picked { list-style: none; padding: 0; margin: 12px 0; }
+.picked li { font-size: 13px; color: var(--muted); padding: 4px 0; border-bottom: 1px solid var(--line); }
+.filelist { list-style: none; padding: 0; margin: 8px 0; }
+.filelist li { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.filelist .fname { flex: 1; word-break: break-word; }
+.filelist form { margin: 0; }
+#upForm .btn-primary { margin-top: 14px; }

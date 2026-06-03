@@ -66,6 +66,18 @@ CREATE TABLE IF NOT EXISTS agreements (
     FOREIGN KEY (token) REFERENCES sessions(token)
 );
 
+-- Client-uploaded assets (logos, images, content) keyed to a session.
+CREATE TABLE IF NOT EXISTS uploads (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    token         TEXT NOT NULL,
+    original_name TEXT,
+    stored_name   TEXT NOT NULL,   -- path relative to UPLOAD_DIR (token/uuid.ext)
+    content_type  TEXT,
+    size_bytes    INTEGER,
+    created_at    TEXT NOT NULL,
+    FOREIGN KEY (token) REFERENCES sessions(token)
+);
+
 -- APPEND-ONLY. Do not UPDATE or DELETE rows here.
 CREATE TABLE IF NOT EXISTS signatures (
     id                INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -223,3 +235,37 @@ def get_signature(sig_id):
             "SELECT * FROM signatures WHERE id = ?", (sig_id,)
         ).fetchone()
         return dict(row) if row else None
+
+
+# ----- uploads ------------------------------------------------------------
+
+def add_upload(token, original_name, stored_name, content_type, size_bytes, created_at):
+    with get_conn() as conn:
+        cur = conn.execute(
+            """INSERT INTO uploads
+               (token, original_name, stored_name, content_type, size_bytes, created_at)
+               VALUES (?,?,?,?,?,?)""",
+            (token, original_name, stored_name, content_type, size_bytes, created_at),
+        )
+        return cur.lastrowid
+
+
+def list_uploads(token):
+    with get_conn() as conn:
+        rows = conn.execute(
+            "SELECT * FROM uploads WHERE token = ? ORDER BY id ASC", (token,)
+        ).fetchall()
+        return [dict(r) for r in rows]
+
+
+def get_upload(upload_id):
+    with get_conn() as conn:
+        row = conn.execute(
+            "SELECT * FROM uploads WHERE id = ?", (upload_id,)
+        ).fetchone()
+        return dict(row) if row else None
+
+
+def delete_upload(upload_id):
+    with get_conn() as conn:
+        conn.execute("DELETE FROM uploads WHERE id = ?", (upload_id,))

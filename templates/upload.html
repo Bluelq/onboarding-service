@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Upload your assets · {{ cfg.business.trading_name }}{% endblock %}
+{% block content %}
+<div class="card">
+  <h1>Upload your logo, photos &amp; content</h1>
+  <p class="lede">Send us everything you'd like on your site — logo, photos, and any text or documents. You can come back and add more at any time.</p>
+
+  {% if saved %}<div class="ok-banner">✓ {{ saved }} file{{ 's' if saved != 1 }} uploaded successfully.</div>{% endif %}
+  {% if rejected %}<div class="errors">Not accepted (unsupported file type): {{ rejected|join(', ') }}</div>{% endif %}
+
+  <form method="post" action="{{ url_for('upload_submit', token=session.token) }}" enctype="multipart/form-data" id="upForm">
+    <label class="dropzone" id="dropzone">
+      <input type="file" name="files" id="fileInput" multiple hidden>
+      <div class="dz-inner">
+        <strong>Drag &amp; drop files here</strong>
+        <span>or click to browse</span>
+        <span class="muted small">Up to {{ max_mb }} MB at a time · {{ allowed_hint }}</span>
+      </div>
+    </label>
+    <ul class="picked" id="picked"></ul>
+    <button type="submit" class="btn btn-primary" id="upBtn" disabled>Upload</button>
+  </form>
+</div>
+
+{% if files %}
+<div class="card">
+  <h2>Uploaded so far ({{ files|length }})</h2>
+  <ul class="filelist">
+    {% for f in files %}
+      <li>
+        <span class="fname">{{ f.original_name }}</span>
+        <span class="muted small">{{ f._size }}</span>
+        <form method="post" action="{{ url_for('upload_delete', token=session.token, upload_id=f.id) }}"
+              onsubmit="return confirm('Remove this file?')">
+          <button class="btn btn-ghost btn-sm" type="submit">Remove</button>
+        </form>
+      </li>
+    {% endfor %}
+  </ul>
+  <p class="muted small">All set? You can simply close this page — we've got your files.</p>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+  var dz = document.getElementById('dropzone'),
+      inp = document.getElementById('fileInput'),
+      list = document.getElementById('picked'),
+      btn = document.getElementById('upBtn');
+  function render() {
+    list.innerHTML = '';
+    var n = inp.files.length;
+    for (var i = 0; i < n; i++) {
+      var li = document.createElement('li');
+      li.textContent = inp.files[i].name;
+      list.appendChild(li);
+    }
+    btn.disabled = n === 0;
+    btn.textContent = n ? ('Upload ' + n + ' file' + (n > 1 ? 's' : '')) : 'Upload';
+  }
+  inp.addEventListener('change', render);
+  ['dragover', 'dragenter'].forEach(function (e) {
+    dz.addEventListener(e, function (ev) { ev.preventDefault(); dz.classList.add('drag'); });
+  });
+  ['dragleave', 'drop'].forEach(function (e) {
+    dz.addEventListener(e, function (ev) { ev.preventDefault(); dz.classList.remove('drag'); });
+  });
+  dz.addEventListener('drop', function (ev) {
+    try { inp.files = ev.dataTransfer.files; } catch (e) {}
+    render();
+  });
+</script>
+{% endblock %}
