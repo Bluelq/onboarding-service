@@ -41,6 +41,7 @@ CREATE TABLE IF NOT EXISTS sessions (
     status          TEXT DEFAULT 'created',   -- created|questionnaire|signed|paid
     crm_lead_id     TEXT,                      -- optional link back to the CRM
     notes           TEXT,
+    offers_json     TEXT,                      -- optional list of packages to present at pay (per-client pricing)
     created_at      TEXT NOT NULL,
     expires_at      TEXT
 );
@@ -98,23 +99,27 @@ def get_conn():
 def init_db():
     with get_conn() as conn:
         conn.executescript(SCHEMA)
+        # Safe migration: add offers_json to sessions tables created before it existed.
+        cols = [r[1] for r in conn.execute("PRAGMA table_info(sessions)").fetchall()]
+        if "offers_json" not in cols:
+            conn.execute("ALTER TABLE sessions ADD COLUMN offers_json TEXT")
 
 
 # ----- sessions -----------------------------------------------------------
 
 def create_session(token, client_name, client_email, company, package_key,
                    deposit_pence, currency, crm_lead_id, notes,
-                   created_at, expires_at):
+                   created_at, expires_at, offers_json=None):
     with get_conn() as conn:
         conn.execute(
             """INSERT INTO sessions
                (token, client_name, client_email, company, package_key,
                 deposit_pence, currency, status, crm_lead_id, notes,
-                created_at, expires_at)
-               VALUES (?,?,?,?,?,?,?,?,?,?,?,?)""",
+                offers_json, created_at, expires_at)
+               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)""",
             (token, client_name, client_email, company, package_key,
              deposit_pence, currency, "created", crm_lead_id, notes,
-             created_at, expires_at),
+             offers_json, created_at, expires_at),
         )
 
 

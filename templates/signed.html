@@ -9,19 +9,39 @@
   <div class="receipt">
     <div><span>Signed by</span><strong>{{ sig.signer_full_name }}</strong></div>
     <div><span>Date &amp; time (UTC)</span><strong>{{ sig.signed_at_utc }}</strong></div>
-    {% if package %}<div><span>Package</span><strong>{{ package.name }}</strong></div>{% endif %}
-    {% if deposit %}<div><span>Deposit to begin</span><strong>{{ deposit }}</strong></div>{% endif %}
   </div>
 
-  {% if can_pay %}
-    <a class="btn btn-primary btn-lg" href="{{ url_for('pay', token=session.token) }}">
-      Pay deposit {{ deposit }} →
-    </a>
-    <p class="muted small">You'll be taken to our secure Stripe payment page.</p>
+  {% set payable = offers | selectattr('stripe_payment_link') | list %}
+  {% if payable %}
+    <h2 style="margin-top:26px;">{% if payable|length > 1 %}Choose your package{% else %}Complete your payment{% endif %}</h2>
+    <div class="offers">
+      {% for o in offers %}
+        <div class="offer-card">
+          <h3>{{ o.name }}</h3>
+          <p class="offer-price">{{ o.price_label }}</p>
+          {% if o.tagline %}<p class="muted small">{{ o.tagline }}</p>{% endif %}
+          {% if o.features %}
+            <ul class="offer-features">
+              {% for f in o.features %}<li>{{ f }}</li>{% endfor %}
+            </ul>
+          {% endif %}
+          {% if o.stripe_payment_link %}
+            <a class="btn btn-primary" href="{{ url_for('pay', token=session.token) }}?pkg={{ o.key }}">
+              Choose &amp; pay — {{ o.price_label }} →
+            </a>
+          {% else %}
+            <p class="muted small">Payment link coming shortly.</p>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+    <p class="muted small">Secure payment via Stripe. You'll be taken to a Stripe-hosted page.</p>
   {% else %}
-    <p class="muted">We'll send your deposit payment link shortly.</p>
+    <p class="muted">We'll send your payment link shortly.</p>
   {% endif %}
 
-  <p class="small"><a href="{{ url_for('agreement_certificate', token=session.token) }}" target="_blank">View signing certificate</a></p>
+  <p class="small" style="margin-top:18px;">
+    <a href="{{ url_for('agreement_certificate', token=session.token) }}" target="_blank">View signing certificate</a>
+  </p>
 </div>
 {% endblock %}

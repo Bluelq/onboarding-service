@@ -82,3 +82,15 @@ input:focus, textarea:focus, select:focus { outline: 2px solid var(--accent); ou
 .linkbox label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 4px; }
 .linkbox input { width: 100%; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 13px; }
 .brief { white-space: pre-wrap; background: #f4f4f5; padding: 14px; border-radius: 8px; font-size: 13px; }
+
+.legal h3 { font-size: 15px; margin: 20px 0 6px; }
+.legal p { font-size: 14px; color: var(--ink); margin: 0 0 6px; }
+.legal h1 { margin-bottom: 4px; }
+
+.offers { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin: 18px 0; text-align: left; }
+.offer-card { border: 1px solid var(--line); border-radius: 12px; padding: 18px; display: flex; flex-direction: column; }
+.offer-card h3 { margin: 0 0 4px; font-size: 17px; }
+.offer-price { font-weight: 700; color: var(--accent); margin: 0 0 8px; font-size: 15px; }
+.offer-features { margin: 8px 0 14px; padding-left: 18px; }
+.offer-features li { font-size: 13px; color: var(--muted); margin-bottom: 4px; }
+.offer-card .btn { margin-top: auto; text-align: center; }

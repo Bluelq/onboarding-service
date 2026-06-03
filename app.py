@@ -37,12 +37,21 @@ import db
 from config import load_config, get_package
 
 app = Flask(__name__)
+# Behind a TLS-terminating proxy (Cloudflare tunnel, Render, etc.) — honour the
+# X-Forwarded-Proto / -Host headers so generated links use https and the real
+# host, and so request.remote_addr reflects the client.
+from werkzeug.middleware.proxy_fix import ProxyFix
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
 db.init_db()
 
 ADMIN_USER = os.environ.get("ADMIN_USER", "admin")
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "changeme")
 # Shared secret the CRM uses to pull a captured brief server-to-server.
 ONBOARDING_API_KEY = os.environ.get("ONBOARDING_API_KEY", "")
+# When the service is reached via a proxy on a different domain (e.g. the
+# Vercel marketing site rewriting /agreement/* to this backend), set this so
+# generated client links use the public domain instead of the backend host.
+PUBLIC_BASE_URL = os.environ.get("PUBLIC_BASE_URL", "").rstrip("/")
 
 
 # --------------------------------------------------------------------------
@@ -52,6 +61,12 @@ ONBOARDING_API_KEY = os.environ.get("ONBOARDING_API_KEY", "")
 def now_utc_iso():
     """Server-side UTC timestamp. Never trust the browser clock for signing."""
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def public_base():
+    """Base URL for client-facing links. PUBLIC_BASE_URL wins (proxy/custom
+    domain); otherwise fall back to the host the request came in on."""
+    return PUBLIC_BASE_URL or request.host_url.rstrip("/")
 
 
 def client_ip():
@@ -85,36 +100,87 @@ def require_admin(f):
     return wrapper
 
 
-def render_agreement_body(cfg, session, package):
-    """Deterministically render the agreement clauses to HTML with the client's
-    details filled in. The EXACT string this returns is what we hash and what the
-    client signs, so it must be stable for a given session + config version."""
-    ag = cfg["agreement"]
+def offers_for_session(cfg, session):
+    """The list of package 'offers' to present at the pay step. A session may
+    carry a tailored set (offers_json) with per-client price/link overrides
+    (e.g. Practice Growth at £300 for one client). Falls back to the single
+    session package for back-compatibility."""
+    raw = session.get("offers_json")
+    offers = []
+    if raw:
+        try:
+            entries = json.loads(raw)
+        except Exception:
+            entries = []
+        for e in entries:
+            merged = dict(get_package(cfg, e.get("key")) or {})
+            merged.setdefault("key", e.get("key"))
+            # Apply per-client overrides (price_label, deposit_pence, stripe link).
+            for k, v in (e or {}).items():
+                if v not in (None, ""):
+                    merged[k] = v
+            if merged.get("key"):
+                offers.append(merged)
+    if not offers:
+        pkg = get_package(cfg, session.get("package_key"))
+        if pkg:
+            offers.append(dict(pkg))
+    return offers
+
+
+def _package_display(cfg, session):
+    """(name, price, deposit_display) for the agreement text. When the client
+    is offered a choice, the wording stays package-agnostic ('the selected
+    package') since they pick — and pay the exact amount — at checkout."""
+    offers = offers_for_session(cfg, session)
+    if len(offers) > 1:
+        return (
+            "selected",
+            "the price shown for the selected package at checkout",
+            "the amount shown for the selected package at checkout",
+        )
+    pkg = offers[0] if offers else {}
+    return (
+        pkg.get("name") or "the agreed",
+        pkg.get("price_label") or "",
+        pounds(pkg.get("deposit_pence") if pkg else session.get("deposit_pence")),
+    )
+
+
+def agreement_subs(cfg, session):
+    """The placeholder values used across the agreement intro, clauses, and
+    footer note. Centralised so the page and the hashed body stay consistent."""
     biz = cfg["business"]
-
     company = (session.get("company") or "").strip()
-    company_clause = f" of {company}" if company else ""
-
-    subs = {
+    name, price, deposit_display = _package_display(cfg, session)
+    return {
         "business_legal_name": biz.get("legal_name", biz.get("trading_name", "")),
         "client_name": session.get("client_name") or "the Client",
-        "client_company_clause": company_clause,
+        "client_company_clause": f" of {company}" if company else "",
         "date": (session.get("created_at") or "")[:10],
-        "package_name": (package or {}).get("name", "the agreed package"),
-        "package_price": (package or {}).get("price_label", ""),
-        "deposit_amount": pounds(session.get("deposit_pence")),
+        "package_name": name,
+        "package_price": price,
+        "deposit_amount": deposit_display,
     }
 
-    def fill(s):
-        for k, v in subs.items():
-            s = s.replace("{{" + k + "}}", str(v))
-        return s
 
+def fill_text(text, subs):
+    for k, v in subs.items():
+        text = (text or "").replace("{{" + k + "}}", str(v))
+    return text
+
+
+def render_agreement_body(cfg, session):
+    """Deterministically render the agreement intro + clauses to HTML with the
+    client's details filled in. The EXACT string this returns is what we hash
+    and what the client signs, so it must be stable for a given session + config."""
+    ag = cfg["agreement"]
+    subs = agreement_subs(cfg, session)
     parts = ['<div class="agreement-body">']
-    parts.append(f'<p class="agreement-intro">{fill(ag["intro"])}</p>')
+    parts.append(f'<p class="agreement-intro">{fill_text(ag["intro"], subs)}</p>')
     for clause in ag.get("clauses", []):
-        parts.append(f'<h3>{fill(clause["heading"])}</h3>')
-        parts.append(f'<p>{fill(clause["body"])}</p>')
+        parts.append(f'<h3>{fill_text(clause["heading"], subs)}</h3>')
+        parts.append(f'<p>{fill_text(clause["body"], subs)}</p>')
     parts.append("</div>")
     return "\n".join(parts)
 
@@ -125,8 +191,7 @@ def ensure_agreement(cfg, session):
     existing = db.latest_agreement(session["token"])
     if existing:
         return existing
-    package = get_package(cfg, session.get("package_key"))
-    body_html = render_agreement_body(cfg, session, package)
+    body_html = render_agreement_body(cfg, session)
     digest = sha256_text(body_html)
     db.save_agreement(
         token=session["token"],
@@ -165,6 +230,23 @@ def root():
     return redirect(url_for("admin"))
 
 
+# ----- legal pages (public) -----------------------------------------------
+
+@app.route("/terms")
+def terms():
+    return render_template("legal_terms.html", cfg=load_config())
+
+
+@app.route("/privacy")
+def privacy():
+    return render_template("legal_privacy.html", cfg=load_config())
+
+
+@app.route("/cancellation")
+def cancellation():
+    return render_template("legal_cancellation.html", cfg=load_config())
+
+
 # --------------------------------------------------------------------------
 # admin
 # --------------------------------------------------------------------------
@@ -174,7 +256,7 @@ def root():
 def admin():
     cfg = load_config()
     sessions = db.list_sessions()
-    base = request.host_url.rstrip("/")
+    base = public_base()
     warn_default_pw = ADMIN_PASSWORD == "changeme"
     return render_template(
         "admin.html", cfg=cfg, sessions=sessions, base=base,
@@ -227,7 +309,7 @@ def admin_session_detail(token):
     q = db.latest_questionnaire(token)
     answers = json.loads(q["answers_json"]) if q else None
     sig = db.get_signature_for_token(token)
-    base = request.host_url.rstrip("/")
+    base = public_base()
     return render_template(
         "admin_detail.html", cfg=cfg, session=session, answers=answers,
         brief=(q["brief"] if q else None), sig=sig, base=base, pounds=pounds,
@@ -310,7 +392,30 @@ def api_create_session():
         abort(401)
     cfg = load_config()
     data = request.get_json(silent=True) or {}
-    package_key = data.get("package_key") or ""
+
+    # Two ways to specify what the client can buy:
+    #   - "offers": [ {key, price_label?, deposit_pence?, stripe_payment_link?}, ... ]
+    #       → present these as selectable options at checkout (per-client pricing).
+    #   - "package_key": "growth"  → single package (back-compat).
+    offers_in = data.get("offers")
+    offers_json = None
+    package_key = (data.get("package_key") or "").strip()
+
+    if isinstance(offers_in, list) and offers_in:
+        # Keep only known fields per entry; ignore anything without a key.
+        clean = []
+        for e in offers_in:
+            if not isinstance(e, dict) or not e.get("key"):
+                continue
+            entry = {"key": e["key"]}
+            for f in ("price_label", "deposit_pence", "stripe_payment_link", "name"):
+                if e.get(f) not in (None, ""):
+                    entry[f] = e[f]
+            clean.append(entry)
+        if clean:
+            offers_json = json.dumps(clean)
+            package_key = package_key or clean[0]["key"]
+
     package = get_package(cfg, package_key)
     deposit_pence = package.get("deposit_pence") if package else None
 
@@ -326,18 +431,23 @@ def api_create_session():
         currency="gbp",
         crm_lead_id=(data.get("crm_lead_id") or "").strip() or None,
         notes=(data.get("notes") or "").strip() or None,
+        offers_json=offers_json,
         created_at=now_utc_iso(),
         expires_at=(datetime.now(timezone.utc) + timedelta(days=expiry_days)).strftime("%Y-%m-%dT%H:%M:%SZ"),
     )
-    base = request.host_url.rstrip("/")
+    base = public_base()
+    session = db.get_session(token)
+    resolved = offers_for_session(cfg, session)
     return jsonify({
         "token": token,
         "questionnaire_url": f"{base}/onboard/{token}",
         "agreement_url": f"{base}/agreement/{token}",
         "pay_url": f"{base}/pay/{token}",
-        "deposit_pence": deposit_pence,
+        "offers": [{"key": o.get("key"), "name": o.get("name"),
+                    "price_label": o.get("price_label"),
+                    "has_link": bool(o.get("stripe_payment_link"))} for o in resolved],
         "package": (package or {}).get("name"),
-        "has_stripe_link": bool(package and package.get("stripe_payment_link")),
+        "has_stripe_link": any(o.get("stripe_payment_link") for o in resolved),
     }), 201
 
 
@@ -375,21 +485,24 @@ def agreement(token):
 
     existing_sig = db.get_signature_for_token(token)
     agreement_row = ensure_agreement(cfg, session)
-    package = get_package(cfg, session.get("package_key"))
+    offers = offers_for_session(cfg, session)
+    # Attach a display deposit for each offer card.
+    for o in offers:
+        o["_deposit"] = pounds(o.get("deposit_pence"))
 
     if existing_sig:
-        # Already signed — show the receipt + pay button, no re-sign.
+        # Already signed — show the receipt + the package choice + pay.
         return render_template(
             "signed.html", cfg=cfg, session=session, sig=existing_sig,
-            package=package, deposit=pounds(session.get("deposit_pence")),
-            can_pay=bool(package and package.get("stripe_payment_link")),
+            offers=offers,
         )
 
     return render_template(
         "agreement.html", cfg=cfg, session=session,
         agreement_html=agreement_row["html"],
         agreement_sha256=agreement_row["content_sha256"],
-        package=package, deposit=pounds(session.get("deposit_pence")),
+        offers=offers,
+        footer_note=fill_text(cfg["agreement"].get("footer_note", ""), agreement_subs(cfg, session)),
     )
 
 
@@ -423,12 +536,15 @@ def agreement_sign(token):
         errors.append("The agreement changed since it was loaded. Please reload and try again.")
 
     if errors:
-        package = get_package(cfg, session.get("package_key"))
+        offers = offers_for_session(cfg, session)
+        for o in offers:
+            o["_deposit"] = pounds(o.get("deposit_pence"))
         return render_template(
             "agreement.html", cfg=cfg, session=session,
             agreement_html=agreement_row["html"],
             agreement_sha256=agreement_row["content_sha256"],
-            package=package, deposit=pounds(session.get("deposit_pence")),
+            offers=offers,
+            footer_note=fill_text(cfg["agreement"].get("footer_note", ""), agreement_subs(cfg, session)),
             errors=errors,
             form={"full_name": full_name},
         ), 400
@@ -494,16 +610,25 @@ def pay(token):
     if not db.get_signature_for_token(token):
         return redirect(url_for("agreement", token=token))
 
-    package = get_package(cfg, session.get("package_key"))
+    offers = offers_for_session(cfg, session)
+    # Which package did they pick? ?pkg=<key>; default to the only/first offer.
+    chosen_key = request.args.get("pkg")
+    package = None
+    if chosen_key:
+        package = next((o for o in offers if o.get("key") == chosen_key), None)
+    if package is None:
+        package = offers[0] if offers else None
+
     link = (package or {}).get("stripe_payment_link") or ""
     if not link:
         return render_template("no_payment_link.html", cfg=cfg, session=session,
                                package=package), 200
 
-    # Prefill the client's email and tag the payment with our token so the
-    # Stripe dashboard / webhook can reconcile it back to this session.
+    # Prefill the client's email and tag the payment with our token + chosen
+    # package so the Stripe dashboard / webhook can reconcile it back.
     sep = "&" if "?" in link else "?"
-    url = f"{link}{sep}client_reference_id={token}"
+    ref = token if not package.get("key") else f"{token}:{package.get('key')}"
+    url = f"{link}{sep}client_reference_id={ref}"
     if session.get("client_email"):
         url += f"&prefilled_email={session['client_email']}"
     db.set_status(token, "paid")  # optimistic; confirm via Stripe dashboard/webhook

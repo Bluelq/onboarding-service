@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Terms of Service · {{ cfg.business.trading_name }}{% endblock %}
+{% block content %}
+<div class="card legal">
+  <h1>Website Terms of Service — simplepresence.co.uk</h1>
+  <p class="muted small">Last updated: {{ cfg.legal.last_updated }}</p>
+
+  <h3>1. Who we are.</h3>
+  <p>This website is operated by {{ cfg.business.legal_name }} trading as {{ cfg.business.trading_name }} ("we", "us", "our"). By using simplepresence.co.uk ("the site") you agree to these terms. If you do not agree, please do not use the site.</p>
+
+  <h3>2. Using the site.</h3>
+  <p>You may use the site for lawful purposes only. You must not misuse it by introducing malware, attempting to gain unauthorised access, scraping it at scale, or disrupting its operation. We may suspend or restrict access if we reasonably believe these terms have been breached.</p>
+
+  <h3>3. Our content.</h3>
+  <p>All text, design, graphics, logos, and other material on the site are owned by us or our licensors and are protected by intellectual property law. You may view and print pages for your own reference, but you may not copy, republish, or use our content commercially without our written permission.</p>
+
+  <h3>4. Accuracy and availability.</h3>
+  <p>We aim to keep the site accurate and available, but we provide it "as is" and make no guarantees that it will be uninterrupted, error-free, or up to date. The site gives general information about our services and is not advice you should rely on without speaking to us first. We may change, suspend, or withdraw any part of the site at any time.</p>
+
+  <h3>5. Enquiries and quotes.</h3>
+  <p>Information on the site, including prices and packages, is an invitation to enquire and not a binding offer. Any work we carry out is governed by a separate Website Design Services Agreement, not by these terms.</p>
+
+  <h3>6. Links to other sites.</h3>
+  <p>The site may link to third-party websites. We do not control those sites and are not responsible for their content, products, or privacy practices. Links are provided for convenience only and do not imply our endorsement.</p>
+
+  <h3>7. Our liability.</h3>
+  <p>Nothing in these terms limits our liability for death or personal injury caused by negligence, for fraud, or for anything that cannot be limited by law. Subject to that, we are not liable for any loss arising from your use of, or inability to use, the site, including indirect or consequential loss. These terms do not affect your statutory rights as a consumer.</p>
+
+  <h3>8. Privacy.</h3>
+  <p>We handle personal data in line with our <a href="{{ url_for('privacy') }}">Privacy Policy</a>, which forms part of these terms.</p>
+
+  <h3>9. Changes to these terms.</h3>
+  <p>We may update these terms from time to time, and the version on the site at the time you use it applies. Please check this page periodically.</p>
+
+  <h3>10. Governing law.</h3>
+  <p>These terms are governed by the law of England and Wales, and the courts of England and Wales have jurisdiction, subject to any consumer protection that applies where you live. Questions about these terms can be sent to <a href="mailto:{{ cfg.business.contact_email }}">{{ cfg.business.contact_email }}</a>.</p>
+
+  <p class="muted small" style="margin-top:24px;">
+    <a href="{{ url_for('privacy') }}">Privacy Policy</a> ·
+    <a href="{{ url_for('cancellation') }}">Cancellation &amp; Refunds</a>
+  </p>
+</div>
+{% endblock %}

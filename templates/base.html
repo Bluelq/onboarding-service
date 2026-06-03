@@ -24,8 +24,12 @@
 
   <footer class="site-footer">
     <div class="wrap">
-      <span>{{ cfg.business.legal_name }}</span>
+      <span>{{ cfg.business.legal_name }} trading as {{ cfg.business.trading_name }}</span>
       {% if cfg.business.contact_email %} · <a href="mailto:{{ cfg.business.contact_email }}">{{ cfg.business.contact_email }}</a>{% endif %}
+      <br>
+      <a href="{{ url_for('terms') }}">Terms</a> ·
+      <a href="{{ url_for('privacy') }}">Privacy</a> ·
+      <a href="{{ url_for('cancellation') }}">Cancellation &amp; Refunds</a>
     </div>
   </footer>
   {% block scripts %}{% endblock %}

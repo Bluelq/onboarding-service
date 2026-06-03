@@ -1,0 +1,12 @@
+{
+  "_comment": "Drop these rewrites into your EXISTING simplepresence.co.uk Vercel project's vercel.json (merge with any rewrites you already have). Replace YOUR-BACKEND.onrender.com with the Render URL of this onboarding service. Result: simplepresence.co.uk/agreement/<token> (and /onboard, /pay, /terms, /privacy, /cancellation) are transparently served by the backend — one domain, no DNS changes. Also set PUBLIC_BASE_URL=https://simplepresence.co.uk on the Render service so the links it generates use your domain.",
+  "rewrites": [
+    { "source": "/onboard/:path*",   "destination": "https://YOUR-BACKEND.onrender.com/onboard/:path*" },
+    { "source": "/agreement/:path*", "destination": "https://YOUR-BACKEND.onrender.com/agreement/:path*" },
+    { "source": "/pay/:path*",       "destination": "https://YOUR-BACKEND.onrender.com/pay/:path*" },
+    { "source": "/static/:path*",    "destination": "https://YOUR-BACKEND.onrender.com/static/:path*" },
+    { "source": "/terms",            "destination": "https://YOUR-BACKEND.onrender.com/terms" },
+    { "source": "/privacy",          "destination": "https://YOUR-BACKEND.onrender.com/privacy" },
+    { "source": "/cancellation",     "destination": "https://YOUR-BACKEND.onrender.com/cancellation" }
+  ]
+}

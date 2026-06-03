@@ -4,10 +4,14 @@
 <div class="card">
   <h1>{{ cfg.agreement.title }}</h1>
 
-  {% if package %}
+  {% if offers %}
     <div class="package-banner">
-      <strong>{{ package.name }}</strong> — {{ package.price_label }}
-      {% if deposit %}· deposit to begin: <strong>{{ deposit }}</strong>{% endif %}
+      {% if offers|length == 1 %}
+        <strong>{{ offers[0].name }}</strong> — {{ offers[0].price_label }}
+      {% else %}
+        After signing you'll choose your package:
+        {% for o in offers %}<strong>{{ o.name }}</strong> ({{ o.price_label }}){% if not loop.last %} &nbsp;or&nbsp; {% endif %}{% endfor %}
+      {% endif %}
     </div>
   {% endif %}
 
@@ -20,7 +24,7 @@
   <div class="agreement-scroll">
     {{ agreement_html|safe }}
   </div>
-  <p class="muted small">{{ cfg.agreement.footer_note }}</p>
+  <p class="muted small">{{ footer_note or cfg.agreement.footer_note }}</p>
 
   <form method="post" action="{{ url_for('agreement_sign', token=session.token) }}" class="form sign-form" id="signForm">
     <input type="hidden" name="agreement_sha256" value="{{ agreement_sha256 }}">

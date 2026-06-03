@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Privacy Policy · {{ cfg.business.trading_name }}{% endblock %}
+{% block content %}
+<div class="card legal">
+  <h1>Privacy Policy — simplepresence.co.uk</h1>
+  <p class="muted small">Last updated: {{ cfg.legal.last_updated }}</p>
+
+  <h3>1. Who is responsible for your data.</h3>
+  <p>{{ cfg.business.legal_name }} trading as {{ cfg.business.trading_name }} is the "data controller" for the personal data described in this policy. You can contact us at <a href="mailto:{{ cfg.business.contact_email }}">{{ cfg.business.contact_email }}</a>{% if cfg.business.address and '[' not in cfg.business.address %} or {{ cfg.business.address }}{% endif %} about anything in this policy.</p>
+
+  <h3>2. What we collect.</h3>
+  <p>When you use our contact or enquiry form we collect the information you give us — typically your name, email address, phone number (if provided), and the details of your enquiry. If you go on to work with us, we also hold project-related information such as billing details and correspondence. When you visit the site we may collect limited technical data (such as IP address and basic analytics) through cookies or similar technology.</p>
+
+  <h3>3. Why we use it and our lawful basis.</h3>
+  <p>We use enquiry data to respond to you and discuss your project — our lawful basis is our <strong>legitimate interest</strong> in dealing with enquiries, and, once you become a client, <strong>performance of a contract</strong> with you. We use limited technical/analytics data based on your <strong>consent</strong> (where required) or our legitimate interest in keeping the site secure and improving it. We will only use your data for direct marketing where you have agreed, and you can opt out at any time.</p>
+
+  <h3>4. Who we share it with.</h3>
+  <p>We do not sell your data. We share it only with service providers who help us run the business — for example email, hosting, analytics, and accounting providers — and only as far as needed. We may also disclose data where the law requires it.</p>
+
+  <h3>5. International transfers.</h3>
+  <p>Some of our providers may store data outside the UK. Where they do, we rely on appropriate safeguards (such as UK adequacy regulations or standard contractual clauses) to protect it.</p>
+
+  <h3>6. How long we keep it.</h3>
+  <p>We keep enquiry data for up to {{ cfg.legal.retention_enquiry }} if it does not lead to a project. Where you become a client, we keep project and financial records for {{ cfg.legal.retention_records }} to meet legal and tax obligations, after which we delete or anonymise it.</p>
+
+  <h3>7. Your rights.</h3>
+  <p>Under UK GDPR you have the right to access your data, to have it corrected or erased, to restrict or object to its use, and to data portability, in each case subject to legal limits. To exercise any of these rights, contact us using the details above; we will respond within one month. You also have the right to complain to the Information Commissioner's Office (ICO) at ico.org.uk or on {{ cfg.legal.ico_phone }}.</p>
+
+  <h3>8. Cookies.</h3>
+  <p>The site uses cookies to function and, where you consent, to measure usage. You can control cookies through your browser settings and through any cookie banner shown on the site.</p>
+
+  <h3>9. Changes.</h3>
+  <p>We may update this policy and will post the current version here with the date it took effect.</p>
+
+  <p class="muted small" style="margin-top:24px;">
+    <a href="{{ url_for('terms') }}">Terms of Service</a> ·
+    <a href="{{ url_for('cancellation') }}">Cancellation &amp; Refunds</a>
+  </p>
+</div>
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Cancellation &amp; Refunds · {{ cfg.business.trading_name }}{% endblock %}
+{% block content %}
+<div class="card legal">
+  <h1>Cancellation &amp; Refunds Policy</h1>
+  <p class="muted small">Last updated: {{ cfg.legal.last_updated }}</p>
+
+  <h3>1. About this policy.</h3>
+  <p>This policy explains your right to cancel and how refunds work. It sits alongside the Website Design Services Agreement; where that agreement and this policy differ, this policy governs cancellation and refunds.</p>
+
+  <h3>2. The deposit.</h3>
+  <p>The deposit set out in your Website Design Services Agreement secures your project slot and covers the time we set aside and the initial work we carry out. It is <strong>non-refundable once work has started</strong>, except where you have a statutory right to a refund as a consumer (see section 4). The balance is due before go-live.</p>
+
+  <h3>3. Cancelling after work has begun.</h3>
+  <p>If you cancel a project once work is under way, the deposit is not returned and you must also pay for any further work completed and any third-party costs (such as domains, hosting, or plugins) we have committed on your behalf up to the date you cancel.</p>
+
+  <h3>4. If you are a consumer (Consumer Contracts Regulations 2013).</h3>
+  <p>If you are an individual buying outside your trade or profession and we agreed the contract at a distance or away from our business premises, you normally have a <strong>14-day cancellation period</strong> ("cooling-off period") starting the day after the contract is made. If you ask us in writing to start work during that period, you can still cancel, but you must pay a reasonable amount for the work done up to the point you tell us you are cancelling. If you ask us to begin and the service is <strong>fully performed</strong> within the 14 days with your agreement, you acknowledge you lose the right to cancel once it is complete.</p>
+
+  <h3>5. How to cancel.</h3>
+  <p>To cancel, email us at <a href="mailto:{{ cfg.business.contact_email }}">{{ cfg.business.contact_email }}</a> with your name and project details, or use any cancellation form we provide. A clear statement is enough; you do not need to give a reason.</p>
+
+  <h3>6. Refunds.</h3>
+  <p>Where a refund is due, we will pay it using the same method you paid with, within <strong>14 days</strong> of the date the cancellation takes effect (or, for consumer service cancellations, within 14 days of being told you wish to cancel), less any amount properly charged for work already done.</p>
+
+  <h3>7. Business clients.</h3>
+  <p>If you are buying as a business, the statutory cooling-off right in section 4 does not apply, and cancellation is governed by the Website Design Services Agreement and section 3 above.</p>
+
+  <p class="muted small" style="margin-top:24px;">
+    <a href="{{ url_for('terms') }}">Terms of Service</a> ·
+    <a href="{{ url_for('privacy') }}">Privacy Policy</a>
+  </p>
+</div>
+{% endblock %}

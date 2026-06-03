@@ -1,13 +1,20 @@
 {
   "business": {
-    "trading_name": "Aentic",
-    "legal_name": "Your Full Legal Name (sole trader) trading as Aentic",
-    "contact_email": "hello@aentic.co.uk",
+    "trading_name": "Simple Presence",
+    "legal_name": "Aentic LLC",
+    "contact_email": "hello@simplepresence.co.uk",
     "contact_phone": "",
-    "address": "Your business address, United Kingdom",
+    "address": "88 Honey Ridge Ct, St. Charles, MO 63304, USA",
     "vat_registered": false,
     "vat_number": "",
-    "website": "https://aentic.co.uk"
+    "website": "https://simplepresence.co.uk"
+  },
+
+  "legal": {
+    "last_updated": "3 June 2026",
+    "retention_enquiry": "12 months",
+    "retention_records": "6 years",
+    "ico_phone": "0303 123 1113"
   },
 
   "branding": {
@@ -61,52 +68,88 @@
 
   "packages": [
     {
-      "key": "starter",
-      "name": "Starter — One-page site",
-      "price_label": "£600",
-      "deposit_pence": 30000,
-      "deposit_label": "£300 deposit (50%)",
-      "stripe_payment_link": "https://buy.stripe.com/5kQcN59CB44qcBz3rX5kk02",
-      "summary": "A polished single-page website, mobile-ready, contact form, basic SEO."
+      "key": "launch",
+      "name": "Practice Launch",
+      "price_label": "£99 one-off",
+      "deposit_pence": 9900,
+      "deposit_label": "Pay £99 to begin",
+      "stripe_payment_link": "https://buy.stripe.com/6oU5kDcON0Se7hfe6B5kk03",
+      "tagline": "Pays for itself with one client (~3 sessions at £100).",
+      "features": [
+        "3–5 page responsive website",
+        "Professional, calming design",
+        "Mobile-optimised",
+        "Basic SEO setup",
+        "Contact form",
+        "Live in 7 working days",
+        "Founding-cohort Slack channel (private, 10 members)",
+        "Testimonial + portfolio permission required (5-min sign-off)"
+      ],
+      "summary": "Entry package — a clean 3–5 page therapist website, live in 7 days."
     },
     {
-      "key": "business",
-      "name": "Business — Multi-page site",
-      "price_label": "£1,200",
+      "key": "growth",
+      "name": "Practice Growth",
+      "price_label": "£600 one-off · then £25/month",
       "deposit_pence": 60000,
-      "deposit_label": "£600 deposit (50%)",
+      "deposit_label": "Pay to begin",
       "stripe_payment_link": "https://buy.stripe.com/5kQcN59CB44qcBz3rX5kk02",
-      "summary": "Up to 5 pages, copy assistance, contact + booking, on-page SEO."
+      "tagline": "Pays for itself with one client (~6 sessions at £100).",
+      "features": [
+        "Up to 8 beautifully crafted pages",
+        "Professional copywriting support",
+        "Blog setup",
+        "Google Business Profile setup",
+        "Hosting, SSL & security included",
+        "Monthly support & updates",
+        "Live in 7–10 working days"
+      ],
+      "summary": "Our most popular package — up to 8 pages, copywriting, blog, GBP, hosting."
     },
     {
-      "key": "custom",
-      "name": "Custom project",
-      "price_label": "Quoted",
-      "deposit_pence": 50000,
-      "deposit_label": "£500 deposit to begin",
-      "stripe_payment_link": "https://buy.stripe.com/5kQcN59CB44qcBz3rX5kk02",
-      "summary": "Scoped to your brief from today's call."
+      "key": "full",
+      "name": "Full Practice",
+      "price_label": "£900 one-off · then £35/month",
+      "deposit_pence": 90000,
+      "deposit_label": "Pay to begin",
+      "stripe_payment_link": "",
+      "tagline": "Pays for itself with one client (~9 sessions at £100).",
+      "features": [
+        "Up to 12 pages",
+        "Online booking integration",
+        "Directory SEO strategy",
+        "Everything in Growth package",
+        "Quarterly performance review",
+        "Priority support",
+        "Live in 10–14 working days"
+      ],
+      "summary": "The complete package — booking, directory SEO, priority support."
     }
   ],
 
   "agreement": {
-    "version": "v1-2026-06",
+    "version": "v2-2026-06",
     "title": "Website Design Services Agreement",
-    "intro": "This agreement is between {{business_legal_name}} (\"the Provider\") and {{client_name}}{{client_company_clause}} (\"the Client\"). By signing below you agree to the following terms.",
+    "intro": "This agreement is between {{business_legal_name}} trading as Simple Presence (\"the Provider\") and {{client_name}}{{client_company_clause}} (\"the Client\"). It sets out the terms on which the Provider will design and build a website for the Client and, where agreed, provide hosting and maintenance. It takes effect on {{date}} and, together with the agreed discovery brief and quotation, forms the whole agreement between the parties for this work.",
     "clauses": [
-      { "heading": "1. Services", "body": "The Provider will design and build a website for the Client based on the discovery brief agreed on {{date}} and the selected package: {{package_name}}. Reasonable revisions are included; substantial changes to the agreed scope may be quoted separately." },
-      { "heading": "2. Fees & deposit", "body": "The total fee is {{package_price}}. A deposit of {{deposit_amount}} is payable to begin work and is non-refundable once design work has started. The balance is due on completion, before the site is handed over or made live." },
-      { "heading": "3. Client responsibilities", "body": "The Client will provide content (text, images, logos) and timely feedback. Delays in providing materials may move the delivery date. The Client confirms they own or are licensed to use all materials supplied." },
-      { "heading": "4. Timescales", "body": "An indicative go-live date will be agreed. Timescales depend on the Client providing content and feedback promptly." },
-      { "heading": "5. Intellectual property", "body": "On full payment, ownership of the final website design and content created for the Client transfers to the Client. The Provider may display the work in its portfolio unless the Client requests otherwise in writing." },
-      { "heading": "6. Third-party costs", "body": "Domain names, hosting, premium plugins, stock imagery and similar third-party costs are not included unless stated and are passed on at cost or arranged by the Client." },
-      { "heading": "7. Cancellation", "body": "Either party may cancel in writing. Fees for work completed up to cancellation remain payable; the deposit is non-refundable once work has begun." },
-      { "heading": "8. Liability", "body": "The Provider's total liability under this agreement is limited to the fees paid by the Client. The Provider is not liable for indirect or consequential losses." },
-      { "heading": "9. Data protection", "body": "Both parties will comply with UK GDPR and the Data Protection Act 2018. Personal data shared for the project is used only to deliver the services." },
-      { "heading": "10. Governing law", "body": "This agreement is governed by the laws of England and Wales and the courts of England and Wales have exclusive jurisdiction." }
+      { "heading": "1. Services", "body": "The Provider will design and build the website described in the agreed discovery brief and quotation for the {{package_name}} package. The discovery brief records the agreed pages, features, and deliverables and forms part of this agreement. Anything not set out in the discovery brief is not included and may be treated as an out-of-scope change under clause 6. Hosting and maintenance are included only if the quotation expressly says so." },
+      { "heading": "2. Fees & deposit", "body": "The total fee for the {{package_name}} package is {{package_price}}, unless the parties agree a different amount in writing. A deposit of {{deposit_amount}} is payable before work begins, and the Provider is not obliged to start until it is received. The deposit reflects the time the Provider reserves for the project and the initial work carried out. If the Client cancels the project before completion the deposit is not refundable, except where the Client uses the satisfaction guarantee in clause 9 or has a statutory right to a refund (see also the separate Cancellation & Refunds Policy)." },
+      { "heading": "3. Balance & payment", "body": "The balance of the fee is due on completion and before the website is handed over or made live (\"go-live\"). The Provider may withhold handover, go-live, source files, and the transfer of rights in clause 7 until all sums due have been paid in full. Invoices are payable within 7 days of the invoice date. Where the Client is a business, the Provider may charge interest on late payment under the Late Payment of Commercial Debts (Interest) Act 1998." },
+      { "heading": "4. Client responsibilities", "body": "The Client will provide all content (text, images, logos, and other materials) and the feedback the Provider reasonably needs, within the agreed timescales. The Client confirms that it owns, or has permission to use, everything it supplies and that those materials do not infringe anyone else's rights or any law. The Client is responsible for checking the accuracy of its own content. Delay in providing content or feedback may delay the project and move agreed dates accordingly." },
+      { "heading": "5. Timescales", "body": "The Provider will use reasonable efforts to meet the dates set out in the discovery brief or quotation, but those dates are estimates rather than guarantees. Timescales depend on the Client supplying content, feedback, and payments on time. Neither party is responsible for delays caused by events outside its reasonable control." },
+      { "heading": "6. Revisions & out-of-scope changes", "body": "For the first 30 days after the Provider first presents work to the Client for review, the {{package_name}} package includes unlimited revisions, as long as each revision is within the scope set out in the agreed discovery brief. Work that goes beyond that scope - including extra pages, new features, package upgrades, or a change to the agreed brief - is an out-of-scope change, even during the 30-day period, and is not covered by the unlimited revisions. Out-of-scope changes are quoted separately and carried out only once the Client approves the additional cost in writing. After the 30-day period ends, further changes, whether in or out of scope, are treated as additional work and quoted in the same way." },
+      { "heading": "7. Intellectual property", "body": "Intellectual property rights in the final website transfer to the Client once the Provider has been paid in full and subject to the satisfaction guarantee in clause 9; until then those rights remain with the Provider. The Client keeps ownership of the content and materials it supplies, and the Provider keeps ownership of any reusable tools, code, or libraries it uses across projects. The Provider may feature the completed website and describe the work in its portfolio and marketing, unless the Client objects in writing. Third-party components remain owned by their licensors and are licensed to the Client on those licensors' terms." },
+      { "heading": "8. Third-party costs", "body": "Costs for domain names, hosting, premium plugins, themes, fonts, stock images, and similar third-party items are not included in the package price unless the quotation says so. The Provider will tell the Client about any such cost before incurring it, and the Client is responsible for paying it. Where the Provider buys these on the Client's behalf, it does so as the Client's agent and may pass on the supplier's price. These third-party costs are not covered by the satisfaction guarantee in clause 9." },
+      { "heading": "9. Satisfaction guarantee & refund", "body": "The Provider offers a satisfaction guarantee: if the Client is not happy with the completed website, the Client may request a full refund of the fees paid to the Provider by telling the Provider in writing within 14 days of the date the deliverables are first provided. Because the refund returns the Client's money in full, any intellectual property and licences that would otherwise transfer under clause 7 do not pass to the Client (or revert to the Provider), and the Client agrees not to publish, launch, or otherwise use the website. The guarantee covers the Provider's design and build fees, including the deposit; it does not cover third-party costs already paid out under clause 8 (such as domains, hosting, plugins, or stock), which are paid to others and remain available to the Client. This guarantee is in addition to, and does not reduce, the Client's statutory rights." },
+      { "heading": "10. Cancellation", "body": "Either party may end this agreement in writing if the other seriously breaches it and does not put the breach right within 14 days of being asked to. If the Client cancels after work has begun but before completion, the deposit is not refundable and the Client must pay for work done and third-party costs committed up to the date of cancellation. After completion, refunds are governed by the satisfaction guarantee in clause 9. Where the Client is a consumer, its statutory cancellation rights are set out in the separate Cancellation & Refunds Policy and are not reduced by this agreement." },
+      { "heading": "11. Limitation of liability", "body": "Nothing in this agreement limits liability for death or personal injury caused by negligence, for fraud, or for anything that cannot be limited by law. Subject to that, the Provider's total liability under or in connection with this agreement is limited to the total fees the Client has paid. The Provider is not liable for indirect or consequential loss, or for loss of profit, revenue, data, or goodwill. The Provider is not responsible for the acts or failures of third-party suppliers such as hosting or plugin providers." },
+      { "heading": "12. Data protection", "body": "Each party will comply with the UK GDPR and the Data Protection Act 2018 when handling personal data under this agreement. Where the Provider processes personal data on the Client's behalf - for example data submitted through the website's forms - it acts on the Client's documented instructions and keeps that data secure. The parties will put a separate data processing agreement in place where one is legally required. The Provider's own handling of enquiry and project data is described in its Privacy Policy." },
+      { "heading": "13. Acceptance & faults", "body": "When the Provider notifies the Client that the website is ready for review, the Client has 7 days to check it and report any faults in writing. The Provider will correct, at no extra cost, faults that mean the website does not match the agreed discovery brief. If no faults are reported within that period the website is treated as accepted, which does not affect the unlimited revisions in clause 6, the satisfaction guarantee in clause 9, or any statutory rights the Client has as a consumer." },
+      { "heading": "14. Governing law & jurisdiction", "body": "This agreement is governed by the law of England and Wales. The courts of England and Wales have exclusive jurisdiction over any dispute, although this does not remove any protection a consumer has under the law of the part of the UK where they live. The parties will try to resolve disputes by discussion before starting court proceedings." },
+      { "heading": "15. General", "body": "This agreement, the discovery brief, and the quotation are the whole agreement between the parties for this work and replace any earlier discussions. If any part is found to be invalid, the rest continues to apply. No change is effective unless agreed in writing by both parties. A person who is not a party has no right under the Contracts (Rights of Third Parties) Act 1999 to enforce it." }
     ],
     "signature_statement": "I confirm I have read and agree to this agreement. I intend this to be my electronic signature and I agree to be legally bound by it.",
-    "footer_note": "This is a starting template, not legal advice — have a solicitor review it before relying on it commercially."
+    "footer_note": "Signed by the Client on {{date}}. This agreement may be signed electronically, and an electronic signature has the same legal effect as a handwritten one. Provider: {{business_legal_name}} trading as Simple Presence (simplepresence.co.uk)."
   },
 
   "session_expiry_days": 30
