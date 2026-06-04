@@ -840,6 +840,24 @@ def api_session_assets(token):
     return resp
 
 
+@app.route("/api/sessions/<token>", methods=["DELETE"])
+def api_delete_session(token):
+    """Delete an UNSIGNED session (abandoned/test) and its files. Signed
+    sessions are refused — a signed agreement is a legal record."""
+    if not ONBOARDING_API_KEY or request.headers.get("X-Api-Key") != ONBOARDING_API_KEY:
+        abort(401)
+    if not db.get_session(token):
+        abort(404)
+    if db.get_signature_for_token(token):
+        return jsonify({"error": "This session is signed and cannot be deleted (legal record)."}), 409
+    import shutil
+    folder = os.path.join(UPLOAD_DIR, token)
+    if os.path.isdir(folder):
+        shutil.rmtree(folder, ignore_errors=True)
+    db.delete_session_cascade(token)
+    return jsonify({"ok": True})
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5055))
     app.run(host="127.0.0.1", port=port, debug=True)

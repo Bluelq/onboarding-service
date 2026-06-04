@@ -269,3 +269,14 @@ def get_upload(upload_id):
 def delete_upload(upload_id):
     with get_conn() as conn:
         conn.execute("DELETE FROM uploads WHERE id = ?", (upload_id,))
+
+
+def delete_session_cascade(token):
+    """Remove a session and everything attached to it. Callers MUST check there
+    is no signature first — signed contracts are legal records, never deleted."""
+    with get_conn() as conn:
+        conn.execute("DELETE FROM questionnaire_responses WHERE token = ?", (token,))
+        conn.execute("DELETE FROM agreements WHERE token = ?", (token,))
+        conn.execute("DELETE FROM uploads WHERE token = ?", (token,))
+        conn.execute("DELETE FROM signatures WHERE token = ?", (token,))
+        conn.execute("DELETE FROM sessions WHERE token = ?", (token,))
