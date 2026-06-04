@@ -754,12 +754,12 @@ def admin_download_upload(upload_id):
                      download_name=up.get("original_name") or "file")
 
 
-@app.route("/admin/sessions/<token>/uploads.zip")
-@require_admin
-def admin_uploads_zip(token):
+def _build_assets_zip(token):
+    """Build an in-memory zip of a session's uploads. Returns a send_file
+    response, or None if there are no files."""
     files = db.list_uploads(token)
     if not files:
-        abort(404)
+        return None
     session = db.get_session(token)
     label = ((session or {}).get("client_name") or token).replace(" ", "_") or token
     mem = io.BytesIO()
@@ -780,6 +780,64 @@ def admin_uploads_zip(token):
     mem.seek(0)
     return send_file(mem, mimetype="application/zip", as_attachment=True,
                      download_name=f"assets_{label}.zip")
+
+
+@app.route("/admin/sessions/<token>/uploads.zip")
+@require_admin
+def admin_uploads_zip(token):
+    resp = _build_assets_zip(token)
+    if resp is None:
+        abort(404)
+    return resp
+
+
+# --------------------------------------------------------------------------
+# CRM control panel: keyed read API (list sessions, download assets)
+# --------------------------------------------------------------------------
+
+@app.route("/api/sessions")
+def api_sessions():
+    """List sessions with onboarding status for the CRM dashboard. Keyed."""
+    if not ONBOARDING_API_KEY or request.headers.get("X-Api-Key") != ONBOARDING_API_KEY:
+        abort(401)
+    base = public_base()
+    out = []
+    for s in db.list_sessions(limit=500):
+        tok = s["token"]
+        sig = db.get_signature_for_token(tok)
+        n_uploads = len(db.list_uploads(tok))
+        out.append({
+            "token": tok,
+            "client_name": s.get("client_name"),
+            "client_email": s.get("client_email"),
+            "company": s.get("company"),
+            "status": s.get("status"),
+            "created_at": s.get("created_at"),
+            "crm_lead_id": s.get("crm_lead_id"),
+            "signed": bool(sig),
+            "signed_by": sig.get("signer_full_name") if sig else None,
+            "signed_at": sig.get("signed_at_utc") if sig else None,
+            "paid": s.get("status") == "paid",
+            "upload_count": n_uploads,
+            "urls": {
+                "questionnaire": f"{base}/onboard/{tok}",
+                "agreement": f"{base}/agreement/{tok}",
+                "upload": f"{base}/upload/{tok}",
+                "certificate": (f"{base}/agreement/{tok}/certificate" if sig else None),
+            },
+        })
+    return jsonify({"sessions": out})
+
+
+@app.route("/api/sessions/<token>/assets.zip")
+def api_session_assets(token):
+    """Keyed zip download of a session's uploaded assets (CRM proxies this)."""
+    if not ONBOARDING_API_KEY or request.headers.get("X-Api-Key") != ONBOARDING_API_KEY:
+        abort(401)
+    resp = _build_assets_zip(token)
+    if resp is None:
+        abort(404)
+    return resp
 
 
 if __name__ == "__main__":
