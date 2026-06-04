@@ -378,8 +378,20 @@ def onboard_submit(token):
     if session.get("status") == "created":
         db.set_status(token, "questionnaire")
 
-    # Straight on to the agreement so the call flows: discuss -> sign -> pay.
+    # A pure intake form ends in a thank-you; a full onboarding continues to
+    # the agreement. Controlled per session by after_intake.
+    if session.get("after_intake") == "thanks":
+        return redirect(url_for("intake_thanks", token=token))
     return redirect(url_for("agreement", token=token))
+
+
+@app.route("/onboard/<token>/thanks")
+def intake_thanks(token):
+    cfg = load_config()
+    session = db.get_session(token)
+    if not session:
+        abort(404)
+    return render_template("intake_thanks.html", cfg=cfg, session=session)
 
 
 def build_brief_text(cfg, session, answers):
@@ -443,6 +455,10 @@ def api_create_session():
     package = get_package(cfg, package_key)
     deposit_pence = package.get("deposit_pence") if package else None
 
+    # What the questionnaire submit leads to: a pure intake form ends in a
+    # thank-you; a full onboarding continues to the agreement.
+    after_intake = "thanks" if data.get("after_intake") == "thanks" else "agreement"
+
     token = secrets.token_urlsafe(9)
     expiry_days = int(cfg.get("session_expiry_days", 30))
     db.create_session(
@@ -456,6 +472,7 @@ def api_create_session():
         crm_lead_id=(data.get("crm_lead_id") or "").strip() or None,
         notes=(data.get("notes") or "").strip() or None,
         offers_json=offers_json,
+        after_intake=after_intake,
         created_at=now_utc_iso(),
         expires_at=(datetime.now(timezone.utc) + timedelta(days=expiry_days)).strftime("%Y-%m-%dT%H:%M:%SZ"),
     )
@@ -806,6 +823,7 @@ def api_sessions():
         tok = s["token"]
         sig = db.get_signature_for_token(tok)
         n_uploads = len(db.list_uploads(tok))
+        intake_done = bool(db.latest_questionnaire(tok))
         out.append({
             "token": tok,
             "client_name": s.get("client_name"),
@@ -814,6 +832,8 @@ def api_sessions():
             "status": s.get("status"),
             "created_at": s.get("created_at"),
             "crm_lead_id": s.get("crm_lead_id"),
+            "after_intake": s.get("after_intake") or "agreement",
+            "intake_done": intake_done,
             "signed": bool(sig),
             "signed_by": sig.get("signer_full_name") if sig else None,
             "signed_at": sig.get("signed_at_utc") if sig else None,

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Thank you · {{ cfg.business.trading_name }}{% endblock %}
+{% block content %}
+<div class="card center">
+  <div class="tick">✓</div>
+  <h1>Thank you{% if session.client_name %}, {{ session.client_name.split(' ')[0] }}{% endif %}</h1>
+  <p class="lede">We've received your responses{% if cfg.business.trading_name %} at {{ cfg.business.trading_name }}{% endif %} — thank you for taking the time. We'll be in touch shortly.</p>
+  <p class="muted small">You can close this page now.</p>
+</div>
+{% endblock %}

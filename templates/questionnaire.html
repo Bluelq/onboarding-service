@@ -39,7 +39,9 @@
       </fieldset>
     {% endfor %}
 
-    <button type="submit" class="btn btn-primary">Save & continue to agreement →</button>
+    <button type="submit" class="btn btn-primary">
+      {% if session.after_intake == 'thanks' %}Submit your responses{% else %}Save &amp; continue to agreement →{% endif %}
+    </button>
   </form>
 </div>
 {% endblock %}
